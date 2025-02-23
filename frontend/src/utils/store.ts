@@ -5,10 +5,14 @@ interface StoreState {
     userid: string;
     username: string;
   };
-  setCurrentUser: (user: {
-    userid: string;
-    username: string;
-  }) => void;
+  setCurrentUser: (user: { userid: string; username: string }) => void;
+
+  activeCategory: string;
+  setActiveCategory: (category: string) => void;
+
+  categoryReRender: boolean;
+  setCategoryReRender: (value: boolean) => void;
+
 }
 
 const useStore = create<StoreState>((set) => ({
@@ -20,6 +24,19 @@ const useStore = create<StoreState>((set) => ({
     set(() => ({
       currentUser: user,
     })),
+
+  activeCategory: "",
+  setActiveCategory: (category) =>
+    set(() => ({
+      activeCategory: category,
+    })),
+
+  categoryReRender: false,
+  setCategoryReRender: (value) =>
+    set(() => ({
+      categoryReRender: value,
+    })),
+
 }));
 
 export default useStore;
