@@ -40,12 +40,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white text-blue-600 p-4 shadow-sm fixed top-0 w-full z-50">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="bg-white text-blue-600 p-4 shadow-sm z-50">
+      <div className="container flex justify-between items-center">
         <h1 className="text-xl font-bold">ToDo</h1>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex space-x-6 lg:flex">
           <Button onClick={handleLogout} variant="primary">
             Logout
           </Button>
