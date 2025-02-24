@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import Button from "../../atoms/Button/Button";
 import { motion } from "framer-motion";
 import { Check, Trash2 } from "lucide-react";
-
+import useStore from "../../../utils/store";
+import axios from "axios";
+import { toast } from "sonner";
 interface todoProps {
   todos: {
     createdAt: Date;
@@ -20,6 +22,11 @@ interface todoProps {
 const TaskCard: React.FC<todoProps> = ({ todos }) => {
   const [isCompleted, setIsCompleted] = useState<boolean>(todos.isComplete);
   const [deadlineColor, setDeadlineColor] = useState<string>("");
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+
+  const todoRender = useStore((state) => state.todoReRender);
+  const setTodoRender = useStore((state) => state.setTodoReRender);
+  const setCurrentUserState = useStore((state) => state.setCurrentUser);
   const [date, setDate] = useState<string>("");
 
   useEffect(() => {
@@ -44,6 +51,37 @@ const TaskCard: React.FC<todoProps> = ({ todos }) => {
       setDeadlineColor("text-green-500");
     }
   }, [todos.deadline]);
+
+  const handleTodoDelete = async () => {
+    setIsDisabled(true);
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/todo/deleteToDo?id=${
+          todos._id
+        }`,
+        {
+          withCredentials: true,
+        }
+      );
+      toast.success(`${todos.title} task deleted.`);
+      setTodoRender(!todoRender);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          toast.error("Failed to delete category. Try again.");
+          setCurrentUserState({
+            userid: "",
+            username: "",
+          });
+        } else {
+          toast.error(`${error.response?.data.message}.`);
+        }
+      } else {
+        toast.error("An unknown error occurred.");
+      }
+    }
+    setIsDisabled(false);
+  };
 
   return (
     <motion.div
@@ -76,7 +114,12 @@ const TaskCard: React.FC<todoProps> = ({ todos }) => {
           <span>{isCompleted ? "Undo" : "Done"}</span>
         </Button>
 
-        <Button variant="primary" className="p-2">
+        <Button
+          variant="primary"
+          className="p-2"
+          onClick={handleTodoDelete}
+          disabled={isDisabled}
+        >
           <Trash2 className="w-5" />
         </Button>
       </div>
