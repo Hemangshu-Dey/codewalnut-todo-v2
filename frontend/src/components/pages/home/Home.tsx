@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { getNewAccessToken } from "../../../utils/getNewAccessToken";
+import useStore from "../../../utils/store";
 import Navbar from "../../organisms/Navbar/Navbar";
 import Sidebar from "../../organisms/Sidebar/Sidebar";
-import useStore from "../../../utils/store";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { getNewAccessToken } from "../../../utils/getNewAccessToken";
+import MainContent from "../../organisms/MainContent/MainContent";
+
 interface CategoryName {
   categoryName: string;
   _id: string;
@@ -14,12 +16,14 @@ interface CategoryName {
   updatedAt: Date;
   __v: number;
 }
+
 const Home = () => {
   const [categoryNames, setCategoryNames] = useState<Array<CategoryName>>([]);
   const categoryRender = useStore((state) => state.categoryReRender);
   const setActiveCategory = useStore((state) => state.setActiveCategory);
   const setCurrentUser = useStore((state) => state.setCurrentUser);
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const getToDoCategories = async () => {
@@ -34,7 +38,7 @@ const Home = () => {
         setActiveCategory(response.data.data[0]?._id);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          if (error.response?.status == 401) {
+          if (error.response?.status === 401) {
             const res = await getNewAccessToken();
             if (!res || res?.status === 401) navigate("/register");
             else {
@@ -53,15 +57,39 @@ const Home = () => {
     };
     getToDoCategories();
   }, [categoryRender, navigate, setActiveCategory, setCurrentUser]);
+
   return (
-    <>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex flex-1">
-          <Sidebar categoryNames={categoryNames} />
+    <div className="min-h-screen overflow-x-hidden">
+      {/* NAVBAR */}
+      <nav className="fixed top-0 w-full z-50">
+        <div className="mx-auto">
+          <Navbar />
+        </div>
+      </nav>
+
+      {/* MAIN CONTAINER */}
+      <div className="flex pt-16">
+        {/* SIDEBAR */}
+        <Sidebar categoryNames={categoryNames} />
+
+        {/* MAIN CONTENT AREA */}
+        <div
+          className={`flex-1 transition-margin duration-300 ${
+            isSidebarOpen ? "lg:ml-64" : ""
+          }`}
+        >
+          <div className="py-6 px-4 sm:px-6 lg:px-8">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="hidden lg:flex items-center"
+            >
+            </button>
+            {/* MAIN CONTENT */}
+              <MainContent />
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
