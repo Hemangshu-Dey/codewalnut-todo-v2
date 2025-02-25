@@ -21,7 +21,7 @@ interface Todo {
 }
 
 const MainContent = () => {
-  const [searchValue, setSearchValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [todos, setTodos] = useState<Array<Todo>>([]);
   const [isDisabled] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -33,7 +33,7 @@ const MainContent = () => {
   const navigate = useNavigate();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
+    setSearchQuery(e.target.value.toLowerCase());
   };
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const MainContent = () => {
       }
     };
     getToDos();
-  }, [todoRender,activeCategory, navigate, setCurrentUser]);
+  }, [todoRender, activeCategory, navigate, setCurrentUser]);
 
   return (
     <div className="flex flex-col h-screen w-full p-4 bg-white">
@@ -90,7 +90,7 @@ const MainContent = () => {
         <Input
           id="search"
           name="search"
-          value={searchValue}
+          value={searchQuery}
           onChange={handleSearchChange}
           type="text"
           placeholder="Search tasks..."
@@ -101,6 +101,9 @@ const MainContent = () => {
       {/* Task List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
         {todos
+          .filter(
+            (todo) => todo.title.toLowerCase().includes(searchQuery) // Filtering todos based on search query
+          )
           .map((todo) => (
             <TaskCard key={todo._id} todos={todo} />
           ))}
