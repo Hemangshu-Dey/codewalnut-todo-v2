@@ -86,6 +86,12 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
     setIsDisabled(false);
   };
 
+   const handleCancel = () => {
+     setFormData({ title: "", description: "" });
+     setSelectedDate(new Date());
+     onClose();
+   };
+
   return (
     <div
       className="fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center items-center z-50"
@@ -135,7 +141,7 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
               <Button
                 type="button"
                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                onClick={onClose}
+                onClick={handleCancel}
               >
                 Cancel
               </Button>
