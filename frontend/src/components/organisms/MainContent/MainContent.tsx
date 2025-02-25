@@ -62,7 +62,7 @@ const MainContent = () => {
               });
             }
           } else {
-            toast.error("Error fetching data");
+            toast.success("All tasks are deleted");
           }
         } else {
           toast.error("An unknown error occurred");
