@@ -1,4 +1,4 @@
-import { useState} from "react";
+import { useState } from "react";
 import Button from "../../atoms/Button/Button";
 import Input from "../../atoms/Input/Input";
 import DatePicker from "../DatePicker/DatePicker";
@@ -18,6 +18,8 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
   });
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  const [titleCharCount, setTitleCharCount] = useState<number>(15);
+  const [descCharCount, setDescCharCount] = useState<number>(30);
 
   const activeCategoryId = useStore((state) => state.activeCategory);
   const todoRender = useStore((state) => state.todoReRender);
@@ -26,27 +28,37 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
 
   if (!isVisible) return null;
 
- const handleChange = (
-   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
- ) => {
-   const name = e.target.name;
-   const value = e.target.value;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
 
-   setFormData((prev) => ({
-     ...prev,
-     [name]: value,
-   }));
- };
+    if (name === "title" && value.length > 15) return;
+    if (name === "description" && value.length > 30) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "title") {
+      setTitleCharCount(15 - value.length);
+    }
+
+    if (name === "description") {
+      setDescCharCount(30 - value.length);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setIsDisabled(true);
-
     if (!formData.title || !formData.description || !selectedDate) {
       toast.error("Empty fields found.");
-      setIsDisabled(false);
       return;
     }
+
+    setIsDisabled(true);
 
     try {
       await axios.post(
@@ -66,6 +78,8 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
       setTodoRender(!todoRender);
       setFormData({ title: "", description: "" });
       setSelectedDate(new Date());
+      setTitleCharCount(15);
+      setDescCharCount(30);
       onClose();
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -86,11 +100,13 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
     setIsDisabled(false);
   };
 
-   const handleCancel = () => {
-     setFormData({ title: "", description: "" });
-     setSelectedDate(new Date());
-     onClose();
-   };
+  const handleCancel = () => {
+    setFormData({ title: "", description: "" });
+    setSelectedDate(new Date());
+    setTitleCharCount(15);
+    setDescCharCount(30);
+    onClose();
+  };
 
   return (
     <div
@@ -101,7 +117,7 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
         <div className="bg-white p-4 rounded-xl">
           <h2 className="text-xl mb-4 font-bold">Write your task.</h2>
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
+            <div className="mb-2">
               <Input
                 type="text"
                 id="title"
@@ -109,20 +125,34 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="Enter task title"
+                placeholder="Enter task title (Max 15 characters)"
                 required
               />
+              <p
+                className={`text-sm mt-1 ${
+                  titleCharCount < 5 ? "text-red-500" : "text-gray-500"
+                }`}
+              >
+                [{titleCharCount}/15]
+              </p>
             </div>
-            <div className="mb-4">
+            <div className="mb-2">
               <textarea
                 id="description"
                 name="description"
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Enter task description"
+                placeholder="Enter task description (Max 30 characters)"
                 required
               />
+              <p
+                className={`text-sm mt-1 ${
+                  descCharCount < 5 ? "text-red-500" : "text-gray-500"
+                }`}
+              >
+                [{descCharCount}/30]
+              </p>
             </div>
             <div className="mb-4">
               <DatePicker
@@ -133,8 +163,12 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
             <div className="flex items-center justify-between">
               <Button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                disabled={isDisabled}
+                className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
+                  titleCharCount < 0 || descCharCount < 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+                disabled={isDisabled || titleCharCount < 0 || descCharCount < 0}
               >
                 Submit
               </Button>
