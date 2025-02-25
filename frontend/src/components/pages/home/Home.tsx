@@ -72,22 +72,22 @@ const Home = () => {
         {/* SIDEBAR */}
         <Sidebar categoryNames={categoryNames} />
 
-        {/* MAIN CONTENT AREA */}
-        <div
-          className={`flex-1 transition-margin duration-300 ${
-            isSidebarOpen ? "lg:ml-64" : ""
-          }`}
-        >
-          <div className="py-6 px-4 sm:px-6 lg:px-8">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="hidden lg:flex items-center"
-            >
-            </button>
-            {/* MAIN CONTENT */}
+        {/* MAIN CONTENT */}
+        {categoryNames.length > 0 && (
+          <div
+            className={`flex-1 transition-margin duration-300 ${
+              isSidebarOpen ? "lg:ml-64" : ""
+            }`}
+          >
+            <div className="py-6 px-4 sm:px-6 lg:px-8">
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="hidden lg:flex items-center"
+              ></button>
               <MainContent />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

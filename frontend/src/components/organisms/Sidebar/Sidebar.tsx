@@ -28,7 +28,8 @@ const Sidebar: React.FC<SidebarProps> = ({ categoryNames }) => {
 
   const activeCategory = useStore((state) => state.activeCategory);
   const setActiveCategory = useStore((state) => state.setActiveCategory);
-
+  const todoRender = useStore((state) => state.todoReRender);
+  const setTodoRender = useStore((state) => state.setTodoReRender);
   const setCurrentUserState = useStore((state) => state.setCurrentUser);
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
@@ -62,6 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categoryNames }) => {
       );
       toast.success(`${item.categoryName} category deleted.`);
       setCategoryRender(!categoryRender);
+      setTodoRender(!todoRender);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log(error);
