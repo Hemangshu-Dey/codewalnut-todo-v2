@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import Button from "../../atoms/Button/Button";
 import { motion } from "framer-motion";
-import { Check, Trash2 } from "lucide-react";
+import { Check, Trash2, RefreshCcw } from "lucide-react";
 import useStore from "../../../utils/store";
 import axios from "axios";
 import { toast } from "sonner";
+import { getNewAccessToken } from "../../../utils/getNewAccessToken";
+import { useNavigate } from "react-router-dom";
 interface todoProps {
   todos: {
     createdAt: Date;
@@ -23,6 +25,8 @@ const TaskCard: React.FC<todoProps> = ({ todos }) => {
   const [isCompleted, setIsCompleted] = useState<boolean>(todos.isComplete);
   const [deadlineColor, setDeadlineColor] = useState<string>("");
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  const setCurrentUser = useStore((state) => state.setCurrentUser);
+   const navigate = useNavigate();
 
   const todoRender = useStore((state) => state.todoReRender);
   const setTodoRender = useStore((state) => state.setTodoReRender);
@@ -83,6 +87,44 @@ const TaskCard: React.FC<todoProps> = ({ todos }) => {
     setIsDisabled(false);
   };
 
+ const toggleTodo = async () => {
+   try {
+     await axios.get(
+       `${import.meta.env.VITE_BACKEND_URL}/api/todo/toggleToDo?todoId=${
+         todos._id
+       }`,
+       {
+         withCredentials: true,
+       }
+     );
+     setIsCompleted(!isCompleted);
+     setTodoRender(!todoRender);
+   } catch (error) {
+     if (axios.isAxiosError(error)) {
+       if (error.response?.status === 401) {
+         const res = await getNewAccessToken();
+         if (!res || res?.status === 401) {
+           navigate("/register");
+         } else if (res.data?.data) {
+           setCurrentUser({
+             userid: res.data.data.id,
+             username: res.data.data.username,
+           });
+         }
+       } else {
+         toast.error("Error updating task status.");
+       }
+     } else {
+       toast.error("An unknown error occurred.");
+     }
+   }
+ };
+
+ const handleToggle = async () => {
+   await toggleTodo();
+ };
+
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -92,14 +134,24 @@ const TaskCard: React.FC<todoProps> = ({ todos }) => {
     >
       <div>
         <h3
-          className={`text-lg font-semibold mb-2 ${
+          className={`text-2xl font-bold mb-2 ${
             isCompleted ? "line-through text-gray-400" : "text-gray-900"
           }`}
         >
           {todos.title}
         </h3>
-        <p className="text-gray-600 mb-2">{todos.description}</p>
-        <p className={`text-sm ${deadlineColor} mt-10 mb-5`}>
+        <p
+          className={`font-bold mb-2 break-words whitespace-normal ${
+            isCompleted ? "line-through text-gray-400" : "text-gray-600"
+          }`}
+        >
+          {todos.description}
+        </p>
+        <p
+          className={`text-sm ${
+            isCompleted ? "line-through text-gray-400" : deadlineColor
+          } font-bold mt-10 mb-5`}
+        >
           Deadline: {date}
         </p>
       </div>
@@ -108,12 +160,15 @@ const TaskCard: React.FC<todoProps> = ({ todos }) => {
         <Button
           variant="primary"
           className="flex items-center space-x-2"
-          onClick={() => setIsCompleted(!isCompleted)}
+          onClick={handleToggle}
         >
-          <Check className="w-4" />
+          {isCompleted ? (
+            <RefreshCcw className="w-4" />
+          ) : (
+            <Check className="w-4" />
+          )}
           <span>{isCompleted ? "Undo" : "Done"}</span>
         </Button>
-
         <Button
           variant="primary"
           className="p-2"
