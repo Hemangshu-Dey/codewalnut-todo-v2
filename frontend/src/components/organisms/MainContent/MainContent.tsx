@@ -8,6 +8,7 @@ import AddTaskModal from "../../molecules/AddTaskModal/AddTaskModal";
 import TaskCard from "../../molecules/TaskCard/TaskCard";
 import { getNewAccessToken } from "../../../utils/getNewAccessToken";
 import { useNavigate } from "react-router-dom";
+
 interface Todo {
   createdAt: Date;
   deadline: Date;
@@ -23,6 +24,7 @@ interface Todo {
 const MainContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [todos, setTodos] = useState<Array<Todo>>([]);
+  const [loading, setLoading] = useState(true);
   const [isDisabled] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -40,6 +42,7 @@ const MainContent = () => {
     if (!activeCategory) return;
 
     const getToDos = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           `${
@@ -68,6 +71,7 @@ const MainContent = () => {
           toast.error("An unknown error occurred");
         }
       }
+      setLoading(false);
     };
     getToDos();
   }, [todoRender, activeCategory, navigate, setCurrentUser]);
@@ -98,16 +102,23 @@ const MainContent = () => {
         />
       </div>
 
-      {/* Task List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-        {todos
-          .filter(
-            (todo) => todo.title.toLowerCase().includes(searchQuery) // Filtering todos based on search query
-          )
-          .map((todo) => (
-            <TaskCard key={todo._id} todos={todo} />
-          ))}
-      </div>
+      {/* Loader */}
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+        </div>
+      ) : (
+        /* Task List */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+          {todos
+            .filter(
+              (todo) => todo.title.toLowerCase().includes(searchQuery)
+            )
+            .map((todo) => (
+              <TaskCard key={todo._id} todos={todo} />
+            ))}
+        </div>
+      )}
     </div>
   );
 };
