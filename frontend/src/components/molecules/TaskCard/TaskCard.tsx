@@ -98,7 +98,7 @@ const TaskCard: React.FC<todoProps> = ({ todos }) => {
        }
      );
      setIsCompleted(!isCompleted);
-     setTodoRender(!todoRender);
+    //  setTodoRender(!todoRender);
    } catch (error) {
      if (axios.isAxiosError(error)) {
        if (error.response?.status === 401) {
