@@ -53,7 +53,7 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.description || !selectedDate) {
+    if (!formData.title || !selectedDate) {
       toast.error("Empty fields found.");
       return;
     }
@@ -65,7 +65,7 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
         `${import.meta.env.VITE_BACKEND_URL}/api/todo/createToDo`,
         {
           title: formData.title,
-          description: formData.description,
+          description: formData.description || "No description given",
           deadline: selectedDate.toISOString(),
           todoCategoryId: activeCategoryId,
         },
@@ -110,14 +110,17 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center items-center z-50"
+      className="fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center z-50"
       id="wrapper"
     >
       <div className="w-[400px] flex flex-col">
-        <div className="bg-white p-4 rounded-xl">
+        <div className="bg-white p-4 rounded-xl mt-25">
           <h2 className="text-xl mb-4 font-bold">Write your task.</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-2">
+              <label htmlFor="title" className="font-bold text-gray-700">
+                Task Title <span className="text-red-500">*</span>
+              </label>
               <Input
                 type="text"
                 id="title"
@@ -126,7 +129,6 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="Enter task title (Max 15 characters)"
-                required
               />
               <p
                 className={`text-sm mt-1 ${
@@ -137,14 +139,16 @@ const AddTaskModal: React.FC<AddTaskProps> = ({ isVisible, onClose }) => {
               </p>
             </div>
             <div className="mb-2">
+              <label htmlFor="description" className="font-bold text-gray-700">
+                Task Description
+              </label>
               <textarea
                 id="description"
                 name="description"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow appearance-none border rounded w-full mt-1 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none h-20"
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Enter task description (Max 30 characters)"
-                required
               />
               <p
                 className={`text-sm mt-1 ${

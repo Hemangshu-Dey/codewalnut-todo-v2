@@ -128,7 +128,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   return (
     <div className="antialiased sans-serif w-full">
-      <div className="container ml-10">
+      <div className="container ml-14">
         <div className="mb-5 w-64">
           <div className="relative">
             <input type="hidden" name="date" />
